@@ -97,9 +97,10 @@ def print(*objects, **kwargs):
     texts = []
     for object in objects:
         try:
-            original_text = str(object)
-        except UnicodeEncodeError:
+            # original_text = str(object)
             original_text = unicode(object)
+        except (UnicodeEncodeError, UnicodeDecodeError):
+            return
         texts.append(original_text.encode(enc, errors='replace').decode(enc))
     return __builtins__.print(*texts, **kwargs)
 
@@ -294,7 +295,6 @@ def main():
     COURSES = soup.find_all('article', 'course')
     courses = []
     for COURSE in COURSES:
-        print(COURSE.h3)
         if COURSE.h3 == None:
             continue
         c_name = COURSE.h3.text.strip()
@@ -331,7 +331,7 @@ def main():
     data = soup.find(*COURSEWARE_SEL)
     WEEKS = data.find_all('div')
     weeks = [(w.h3.a.string, [BASE_URL + a['href'] for a in
-             w.ul.find_all('a')]) for w in WEEKS]
+             w.ul.find_all('a')]) for w in WEEKS if w.ul != None]
     numOfWeeks = len(weeks)
 
     # Choose Week or choose all
